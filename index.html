@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>For Your Life</title>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'MedievalSharp', cursive;
+      text-align: center;
+      margin: 20px;
+      color: #2b1d0e;
+      background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+      background-color: #fdf3dc;
+      background-repeat: repeat;
+    }
+    .player {
+      margin-bottom: 40px;
+    }
+    .bar-container {
+      width: 80%;
+      height: 30px;
+      background-color: #ddd;
+      margin: 10px auto;
+      border-radius: 5px;
+      position: relative;
+    }
+    .health-bar {
+      height: 100%;
+      width: 100%;
+      border-radius: 5px;
+      position: relative;
+      text-align: center;
+      line-height: 30px;
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px black;
+    }
+    .bar-text {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-family: 'MedievalSharp', cursive;
+      border: 2px solid #5c4320;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .blue-button {
+      background-color: #bcd3ff;
+      color: #002f6c;
+    }
+    .red-button {
+      background-color: #ffb3b3;
+      color: #7c0a02;
+    }
+    .disabled {
+      background-color: #ccc !important;
+      pointer-events: none;
+    }
+    .finisher {
+      background-color: #800000;
+      color: white;
+      font-weight: bold;
+      border: 2px solid #400000;
+    }
+    h1 {
+      font-size: 36px;
+      margin-bottom: 30px;
+    }
+    h2 {
+      font-size: 24px;
+    }
+    #winner-text {
+      font-size: 32px;
+      margin-top: 30px;
+      color: darkgoldenrod;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>For Your Life</h1>
+
+  <div class="player">
+    <h2 style="color: blue;">Blue <img src="blue-heart.png" alt="Blue Heart" width="24"></h2>
+    <div class="bar-container">
+      <div id="bar1" class="health-bar"><span id="bar1-text" class="bar-text">100/100</span></div>
+    </div>
+    <button id="p1-5" class="blue-button" onclick="changeScore(2, -5)">Hand Snipe</button>
+    <button id="p1-15" class="blue-button" onclick="changeScore(2, -15)">Body Strike</button>
+    <button id="p1-25" class="blue-button" onclick="changeScore(2, -25)">Critical Hit</button>
+    <button id="p1-finisher" class="finisher" onclick="finisher(2)" style="display:none;">Finisher!</button>
+  </div>
+
+  <div class="player">
+    <h2 style="color: red;">Red <img src="red-heart.png" alt="Red Heart" width="24"></h2>
+    <div class="bar-container">
+      <div id="bar2" class="health-bar"><span id="bar2-text" class="bar-text">100/100</span></div>
+    </div>
+    <button id="p2-5" class="red-button" onclick="changeScore(1, -5)">Hand Snipe</button>
+    <button id="p2-15" class="red-button" onclick="changeScore(1, -15)">Body Strike</button>
+    <button id="p2-25" class="red-button" onclick="changeScore(1, -25)">Critical Hit</button>
+    <button id="p2-finisher" class="finisher" onclick="finisher(1)" style="display:none;">Finisher!</button>
+  </div>
+
+  <div id="winner-text"></div>
+  <div id="winner-image" style="margin-top: 20px;"></div>
+
+  <script>
+    let scores = {1: 100, 2: 100};
+
+    function changeScore(player, amount) {
+      scores[player] = Math.max(0, scores[player] + amount);
+      updateUI();
+    }
+
+    function finisher(player) {
+      scores[player] = 0;
+      updateUI();
+    }
+
+    function updateUI() {
+      for (let i = 1; i <= 2; i++) {
+        const bar = document.getElementById('bar' + i);
+        const barText = document.getElementById('bar' + i + '-text');
+        bar.style.width = scores[i] + '%';
+        barText.textContent = scores[i] + '/100';
+        bar.style.backgroundColor =
+          scores[i] > 50 ? 'green' :
+          scores[i] > 25 ? 'orange' : 'red';
+      }
+
+      const winnerText = document.getElementById('winner-text');
+      const winnerImage = document.getElementById('winner-image');
+
+      if (scores[1] === 0) {
+        winnerText.textContent = "🏆 Red Wins!";
+        winnerImage.innerHTML = '<img src="redgoblin.gif" alt="Red Goblin" width="120">';
+        hideAllButtons();
+        return;
+      } else if (scores[2] === 0) {
+        winnerText.textContent = "🏆 Blue Wins!";
+        winnerImage.innerHTML = '<img src="bluegoblin.gif" alt="Blue Goblin" width="120">';
+        hideAllButtons();
+        return;
+      }
+
+      const finisherForP1 = scores[2] <= 25 && scores[2] > 0;
+      const finisherForP2 = scores[1] <= 25 && scores[1] > 0;
+
+      document.getElementById('p1-finisher').style.display = finisherForP1 ? 'inline-block' : 'none';
+      document.getElementById('p2-finisher').style.display = finisherForP2 ? 'inline-block' : 'none';
+
+      ['p1-5', 'p1-15', 'p1-25'].forEach(id => {
+        document.getElementById(id).style.display = finisherForP1 ? 'none' : 'inline-block';
+      });
+      ['p2-5', 'p2-15', 'p2-25'].forEach(id => {
+        document.getElementById(id).style.display = finisherForP2 ? 'none' : 'inline-block';
+      });
+    }
+
+    function hideAllButtons() {
+      const allButtons = document.querySelectorAll("button");
+      allButtons.forEach(btn => {
+        if (!btn.textContent.includes("Winner")) btn.style.display = "none";
+      });
+    }
+
+    updateUI();
+  </script>
+
+</body>
+</html>
